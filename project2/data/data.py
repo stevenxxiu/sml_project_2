@@ -1,10 +1,11 @@
 
 import csv
+import pickle
 
 from sklearn.feature_extraction import DictVectorizer
 
 
-def conv(in_sr, out_sr):
+def conv(in_sr, out_sr, pickle_sr):
     '''
     This method converts a csv file containing all the features of every suburb
     into a scikit-learn readable data structures. First, we turn the data into
@@ -74,16 +75,18 @@ def conv(in_sr, out_sr):
                 else:
                     instance[feature_names[i]] = float(feat_value)
         matrix.append(instance)
-    vec = DictVectorizer()
-    vec.fit_transform(matrix).toarray()
+    dict_vectorizer = DictVectorizer()
+    X = dict_vectorizer.fit_transform(matrix).toarray()
     writer = csv.writer(out_sr)
-    writer.writerow(vec.get_feature_names())
-    writer.writerows(vec.fit_transform(matrix).toarray())
+    writer.writerow(dict_vectorizer.get_feature_names())
+    writer.writerows(X)
+    pickle.dump((dict_vectorizer.get_feature_names(), categorical_feats, X), pickle_sr)
 
 
 def main():
-    with open('data/matrix_mod.csv') as in_sr, open('data/output.csv', 'w') as out_sr:
-        conv(in_sr, out_sr)
+    with open('data/input.csv') as in_sr, open('data/binarized.csv', 'w') as out_sr, \
+            open('data/binarized.pickle', 'wb') as pickle_sr:
+        conv(in_sr, out_sr, pickle_sr)
 
 if __name__ == '__main__':
     main()
