@@ -1,6 +1,7 @@
 
 import csv
 import pickle
+from collections import OrderedDict
 
 from sklearn.feature_extraction import DictVectorizer
 
@@ -9,7 +10,7 @@ def conv(in_sr, out_sr, pickle_sr):
     '''
     This method converts a csv file containing all the features of every suburb
     into a scikit-learn readable data structures. First, we turn the data into
-    dictionaries (e.g. {'Community Name': 'Ascot Vale (Suburb)', ... ,'Pharmacies': 4, ...}).
+    dictionaries (e.g. {'Community Name': 'Ascot Vale (Suburb)', ... , 'Pharmacies': 4, ...}).
     Then we convert it using scikit-learn's DictVectorizer.
 
     Note that:
@@ -19,7 +20,8 @@ def conv(in_sr, out_sr, pickle_sr):
         - Some continuous values have the value '<5', this was turned into 1
         - 'n/a' values were turned into None
     '''
-    categorical_feats = [
+    categorical_names = [
+        'Community Name',
         'Region',
         'Map reference',
         'Grid reference',
@@ -51,36 +53,35 @@ def conv(in_sr, out_sr, pickle_sr):
     reader = csv.reader(in_sr)
     feature_names = next(reader)
     matrix = []
-    for line in reader:
+    for values in reader:
         instance = {}
-        for i, feat_value in enumerate(line):
-            if feature_names[i] == 'Location':
-                feat_values = feat_value.split()
+        for name, value in zip(feature_names, values):
+            if name == 'Location':
+                feat_values = value.split()
                 distance = feat_values[0]
                 direction = feat_values[1]
                 instance['Location (distance km)'] = float(distance.replace('km', ''))
                 instance['Location (direction)'] = direction
                 continue
-            if feature_names[i] in categorical_feats or i == 0:
-                if feat_value == 'n/a':
-                    instance[feature_names[i]] = None
-                else:
-                    instance[feature_names[i]] = feat_value
+            if name in categorical_names:
+                instance[name] = None if value == 'n/a' else value
             else:
-                if '<' in feat_value:
-                    feat_value = '1'
-                feat_value = feat_value.replace(',', '')
-                if feat_value == 'n/a':
-                    instance[feature_names[i]] = None
-                else:
-                    instance[feature_names[i]] = float(feat_value)
+                if '<' in value:
+                    value = '1'
+                value = value.replace(',', '')
+                instance[name] = None if value == 'n/a' else float(value)
         matrix.append(instance)
     dict_vectorizer = DictVectorizer()
     X = dict_vectorizer.fit_transform(matrix).toarray()
     writer = csv.writer(out_sr)
-    writer.writerow(dict_vectorizer.get_feature_names())
+    writer.writerow(dict_vectorizer.feature_names_)
     writer.writerows(X)
-    pickle.dump((dict_vectorizer.get_feature_names(), categorical_feats, X), pickle_sr)
+    pickle.dump((
+        dict_vectorizer.feature_names_,
+        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' in name),
+        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' not in name),
+        X
+    ), pickle_sr)
 
 
 def main():
