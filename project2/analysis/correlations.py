@@ -1,5 +1,6 @@
 
 import pickle
+import csv
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -25,6 +26,13 @@ def top_correlations(X, names, dist):
         print('{: <80}{: <80}{}'.format(
             list(names.values())[col], list(names.values())[row], dists_flattened[i]
         ))
+    with open('data/correlations.csv', 'w') as out_sr:
+        writer = csv.writer(out_sr)
+        writer.writerow(['feature_1', 'feature_2', 'corr'])
+        for i in indices:
+            row, col = i//len(names), i % len(names)
+            if not np.isnan(dists_flattened[i]) and not np.isinf(dists_flattened[i]):
+                writer.writerow([list(names.values())[col], list(names.values())[row], dists_flattened[i]])
 
 
 def main():
