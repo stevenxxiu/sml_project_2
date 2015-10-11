@@ -1,6 +1,7 @@
 
 import csv
 import pickle
+import numpy as np
 from collections import OrderedDict
 
 from sklearn.feature_extraction import DictVectorizer
@@ -50,12 +51,39 @@ def conv(in_sr, out_sr, pickle_sr):
         'Nearest public hospital with maternity services',
         'Nearest public hospital with emergency department',
     ]
+
+    geo_names = [
+        "Location",
+        "Population Density",
+        "Travel time to GPO (minutes)",
+        "Distance to GPO (km)",
+        "LGA",
+        "Primary Care Partnership",
+        "Medicare Local	Area (km^2)",
+        "DHS Area"
+    ]
+
+    land_use_names = [
+        "Commercial (km^2)",
+        "Commercial (%)",
+        "Industrial (km^2)",
+        "Industrial (%)",
+        "Residential (km^2)",
+        "Residential (%)",
+        "Rural (km^2)",
+        "Rural (%)",
+        "Other (km^2)",
+        "Other (%)"
+    ]
+
     reader = csv.reader(in_sr)
-    feature_names = next(reader)
+    feature_names = next(reader)[1:]
     matrix = []
+    labels = []
     for values in reader:
         instance = {}
-        for name, value in zip(feature_names, values):
+        labels.append(values[0])
+        for name, value in zip(feature_names, values[1:]):
             if name == 'Location':
                 feat_values = value.split()
                 distance = feat_values[0]
@@ -71,6 +99,7 @@ def conv(in_sr, out_sr, pickle_sr):
                 value = value.replace(',', '')
                 instance[name] = None if value == 'n/a' else float(value)
         matrix.append(instance)
+
     dict_vectorizer = DictVectorizer()
     X = dict_vectorizer.fit_transform(matrix).toarray()
     writer = csv.writer(out_sr)
@@ -80,6 +109,9 @@ def conv(in_sr, out_sr, pickle_sr):
         dict_vectorizer.feature_names_,
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' in name),
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' not in name),
+        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in geo_names) ),
+        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in land_use_names)),
+        labels,
         X
     ), pickle_sr)
 
