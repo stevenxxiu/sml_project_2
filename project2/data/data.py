@@ -80,6 +80,7 @@ def conv(in_sr, out_sr, pickle_sr):
     feature_names = next(reader)[1:]
     matrix = []
     labels = []
+    location = []
     for values in reader:
         instance = {}
         labels.append(values[0])
@@ -90,6 +91,7 @@ def conv(in_sr, out_sr, pickle_sr):
                 direction = feat_values[1]
                 instance['Location (distance km)'] = float(distance.replace('km', ''))
                 instance['Location (direction)'] = direction
+                location.append([instance['Location (distance km)'], instance['Location (direction)']])
                 continue
             if name in categorical_names:
                 instance[name] = None if value == 'n/a' else value
@@ -112,6 +114,7 @@ def conv(in_sr, out_sr, pickle_sr):
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in geo_names) ),
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in land_use_names)),
         labels,
+        location,
         X
     ), pickle_sr)
 
