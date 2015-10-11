@@ -111,7 +111,7 @@ def conv(in_sr, out_sr, pickle_sr):
         dict_vectorizer.feature_names_,
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' in name),
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if '=' not in name),
-        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in geo_names) ),
+        OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in geo_names)),
         OrderedDict((i, name) for i, name in enumerate(dict_vectorizer.feature_names_) if any(l in name for l in land_use_names)),
         labels,
         location,
