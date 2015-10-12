@@ -1,7 +1,6 @@
 
 import csv
 import pickle
-import numpy as np
 from collections import OrderedDict
 
 from sklearn.feature_extraction import DictVectorizer
