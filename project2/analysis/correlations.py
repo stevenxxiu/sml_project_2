@@ -1,6 +1,6 @@
 
-import pickle
 import csv
+import pickle
 
 import numpy as np
 from scipy.stats import pearsonr
@@ -37,7 +37,7 @@ def top_correlations(X, names, dist):
 
 def main():
     with open('data/binarized.pickle', 'rb') as pickle_sr:
-        feature_names, categorical_names, numeric_names, geo_names, land_use_names, location, labels, X = pickle.load(pickle_sr)
+        labels, names, categorical_names, numeric_names, X = pickle.load(pickle_sr)
         print('categorical:')
         top_correlations(X, categorical_names, matthews_corrcoef)
         print()
