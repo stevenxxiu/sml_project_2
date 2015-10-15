@@ -305,16 +305,9 @@ def main():
     # endregion
     with open('data/binarized.pickle', 'rb') as pickle_sr:
         labels, names, categorical_names, numeric_names, X = pickle.load(pickle_sr)
-        with open('data/correlations_filtered.csv') as sr:
-            keep_names = csv.DictReader(sr).fieldnames
-            keep_rows = set(
-                i for i, name in enumerate(names) if any(name.startswith(keep_name) for keep_name in keep_names)
-            )
-            # print removed names
-            # print('\n'.join(names[i] for i in sorted(set(range(len(names))) - keep_rows)))
         group = group_1
         rows = set(i for i, name in enumerate(names) if any(name.startswith(group_name) for group_name in group))
-        X = normalize_instances(X, names, numeric_names)[:, sorted(rows & keep_rows)]
+        X = normalize_instances(X, names, numeric_names)[:, sorted(rows)]
         mult_scl(X, labels)
 
 if __name__ == '__main__':
