@@ -12,3 +12,5 @@ axis(1, 1:5, labels=c(
     "4th top\ncountry\nof birth\n= Philippines",
     "Born in\nnon-English\nspeaking\ncountry,\npersons"
 ), padj=1)
+
+data = merge(read.csv('data/housing.csv'), read.csv('data/binarized.csv'), by='Community Name', all=TRUE)
